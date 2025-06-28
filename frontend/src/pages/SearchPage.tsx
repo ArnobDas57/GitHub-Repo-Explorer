@@ -1,9 +1,52 @@
-import React from 'react'
+import { useEffect, useState, useContext } from "react";
+import { axiosInstance } from "../utils/axiosInstance";
+import {
+  Box,
+  Button,
+  Checkbox,
+  TextField,
+  Typography,
+  FormControlLabel,
+  Paper,
+  Divider,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 
 const SearchPage = () => {
-  return (
-    <div>SearchPage</div>
-  )
-}
+  return <Paper sx={{ backgroundColor: "rgb(12, 15, 72)" }}>
+    <Typography variant="h4" gutterBottom>
+      Search Page
+    </Typography>
+    <Box sx={{ padding: 2 }}>
+      <TextField
+        label="Search Repositories"
+        variant="outlined"
+        fullWidth
+        margin="normal" 
+      />
+      <Button variant="contained" color="primary" fullWidth>
+        Search
+      </Button>
+    </Box>
+    <Divider sx={{ margin: 2 }} />
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h6">Search Results</Typography>
+      {/* Placeholder for search results */}
+      <Box sx={{ marginTop: 2 }}>
+        <Alert severity="info">No results found. Try a different search.</Alert>
+      </Box>
+    </Box>
+    
+  <Box sx={{ padding: 2 }}>
+      <Typography variant="h6">Popular Repositories</Typography>
+      {/* Placeholder for popular repositories */}
+      <Box sx={{ marginTop: 2 }}>
+        <Alert severity="info">No popular repositories available.</Alert>
+      </Box>  
+    </Box>
 
-export default SearchPage
+  </Paper>;
+};
+
+export default SearchPage;

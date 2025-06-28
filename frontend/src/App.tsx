@@ -36,15 +36,14 @@ function App() {
     () =>
       createTheme({
         palette: {
-          mode,
           primary: {
-            main: mode === "light" ? "rgb(51, 117, 222)" : "#rgb(5, 13, 26)",
+            main: mode === "light" ? "rgb(30, 72, 144)" : "#rgb(5, 13, 26)",
           },
           secondary: {
-            main: mode === "light" ? "rgb(87, 175, 159)" : "#rgb(30, 222, 132)",
+            main: mode === "light" ? "rgb(166, 218, 208)" : "#rgb(30, 222, 132)",
           },
           background: {
-            default: mode === "light" ? "rgb(240, 242, 245)" : "#121212",
+            default: mode === "light" ? "rgb(10, 18, 29)" : "#121212",
             paper: mode === "light" ? "rgb(255, 255, 255)" : "#1e1e1e",
           },
         },
@@ -58,7 +57,7 @@ function App() {
                 // Dynamic background based on theme mode
                 background:
                   mode === "light"
-                    ? "linear-gradient(to right, rgb(87, 175, 159), rgb(119, 132, 190))"
+                    ? "linear-gradient(to right, rgb(243, 240, 183), rgb(243, 240, 183))"
                     : "linear-gradient(to right, #2c3e50, #34495e)", // Darker gradient for dark mode
               },
             },
@@ -118,7 +117,7 @@ function App() {
                   flex: 1,
                   padding: 2,
                   margin: 2,
-                  backgroundColor: "background.paper",
+                  backgroundColor: "rgb(249, 248, 227)",
                 }}
               >
                 <Routes>
