@@ -1,43 +1,44 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { axiosInstance } from "../utils/axiosInstance";
 import {
   Box,
   Button,
-  Checkbox,
   TextField,
   Typography,
-  FormControlLabel,
-  Paper,
-  Divider,
   Alert,
   CircularProgress,
 } from "@mui/material";
 import { AuthContext } from "../App";
+import { Lock, Email } from "@mui/icons-material";
 
 const LoginPage = () => {
-  const { handleLogin } = useContext(AuthContext);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const { handleLogin } = useContext(AuthContext);
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setError("");
 
     try {
       const response = await axiosInstance.post("/login", {
         identifier,
         password,
       });
+
       handleLogin(response.data);
       navigate("/search");
     } catch (err) {
       console.log("Login error:", err);
-      setError("Invalid username or password");
+      setError("Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,8 +56,8 @@ const LoginPage = () => {
         marginTop: 5,
       }}
     >
-      <Typography variant="h3" gutterBottom color="white">
-        Welcome back!
+      <Typography variant="h4" gutterBottom color="white">
+        Welcome back to Repo Explorer!
       </Typography>
       <Typography variant="h6" gutterBottom color="white">
         Sign in to your account
@@ -70,7 +71,8 @@ const LoginPage = () => {
           borderRadius: 2,
           padding: 2,
           border: "1px solid rgba(255, 255, 255, 0.2)",
-          backgroundColor: "rgba(139, 116, 215, 0.35)",
+          backgroundColor: "rgba(84, 62, 149, 0.51)",
+          boxShadow: 24,
         }}
       >
         <form onSubmit={handleSubmit}>
@@ -81,6 +83,7 @@ const LoginPage = () => {
             variant="filled"
             InputProps={{
               style: { color: "white" },
+              endAdornment: <Email sx={{ color: "white" }} />,
             }}
             sx={{
               "& .MuiFilledInput-root": {
@@ -121,7 +124,7 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
               style: { color: "white" },
-              
+              endAdornment: <Lock sx={{ color: "white" }} />,
             }}
           />
 
@@ -164,6 +167,42 @@ const LoginPage = () => {
             {loading ? <CircularProgress size={24} /> : "Login"}
           </Button>
         </form>
+        <Typography
+          onClick={() => navigate("/forgot-password")}
+          variant="body2"
+          sx={{
+            textAlign: "right",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: "white",
+            fontWeight: "bold",
+            "&:hover": {
+              color: "rgb(236, 160, 84)",
+            },
+          }}
+        >
+          Forgot Password?
+        </Typography>
+        <Typography
+          onClick={() => navigate("/register")}
+          variant="body2"
+          sx={{
+            mt: 1,
+            textAlign: "right",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            color: "white",
+            fontWeight: "normal", // Remove bold from the entire text
+            "&:hover": {
+              color: "rgb(236, 160, 84)",
+            },
+          }}
+        >
+          Don't have an account?{" "}
+          <Box component="span" sx={{ fontWeight: "bold" }}>
+            Register
+          </Box>
+        </Typography>
       </Box>
     </Box>
   );

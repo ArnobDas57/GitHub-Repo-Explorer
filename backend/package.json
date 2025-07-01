@@ -4,9 +4,9 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --watch 'server/**/*.ts' --exec 'ts-node' server/server.ts",
+    "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "npm run build && node dist/server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
@@ -22,9 +22,11 @@
     "@types/express": "^5.0.3",
     "@types/helmet": "^4.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.8",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
 }
+
+

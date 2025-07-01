@@ -1,11 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { Box, Typography, Avatar, Fade, Slide, Button } from "@mui/material";
+import { Box, Typography, Avatar, Fade, Button } from "@mui/material";
 import { FaGithub } from "react-icons/fa";
 import { FaSearchengin } from "react-icons/fa6";
+import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../App";
+import { useContext, useState } from "react";
+import { GrLogout } from "react-icons/gr";
 
 // Option 1: Simple CSS Animation with keyframes
 const Header = () => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const navigate = useNavigate();
+
+  const { isAuthenticated } = useContext(AuthContext);
+
   const text = "Repo Explorer";
+
+  const handleAvatarClick = () => {
+    if (isAuthenticated) {
+      navigate("/search");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogoutClick = () => {
+    handleMenuClose();
+    handleLogout();
+    navigate("/login");
+  };
+
+  const getFirstLetter = (text: string) => {
+    return text ? text.charAt(0).toUpperCase() : "";
+  };
 
   return (
     <Box
@@ -30,24 +61,35 @@ const Header = () => {
           <FaSearchengin size={25} color="white" />
         </Avatar>
       </Box>
-      <Typography variant="h4" color="rgb(235, 221, 255)">
-        {text.split("").map((char, index) => (
-          <span
-            key={index}
-            className="char-animation"
-            style={{
-              display: "inline-block",
-              animationDelay: `${index * 0.2}s`,
-            }}
-          >
-            {char === " " ? "\u00A0" : char}
-          </span>
-        ))}
-      </Typography>
 
-      <Fade in={true} timeout={2000} style={{ marginLeft: "auto", padding: "0 16px", marginTop: "8px" }}>
+      <Link
+        to={isAuthenticated ? "/search" : "/login"}
+        style={{ textDecoration: "none", color: "white" }}
+      >
+        <Typography variant="h4" color="rgb(235, 221, 255)">
+          {text.split("").map((char, index) => (
+            <span
+              key={index}
+              className="char-animation"
+              style={{
+                display: "inline-block",
+                animationDelay: `${index * 0.2}s`,
+              }}
+            >
+              {char === " " ? "\u00A0" : char}
+            </span>
+          ))}
+        </Typography>
+      </Link>
+
+      <Fade
+        in={true}
+        timeout={2000}
+        style={{ marginLeft: "auto", padding: "0 16px", marginTop: "8px" }}
+      >
         <Box>
           <Button
+            onClick={() => navigate("/login")}
             variant="text"
             sx={{
               marginLeft: "auto",
@@ -60,6 +102,7 @@ const Header = () => {
             Login
           </Button>
           <Button
+            onClick={() => navigate("/register")}
             variant="text"
             sx={{
               marginLeft: 1,

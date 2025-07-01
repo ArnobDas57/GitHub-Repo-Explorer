@@ -13,19 +13,37 @@ import {
   ThemeProvider,
   createTheme,
   Divider,
-  Fade
+  Fade,
 } from "@mui/material";
-import { useEffect, useState, createContext, useMemo } from "react";
+import {
+  useEffect,
+  useState,
+  createContext,
+  useMemo,
+  type SetStateAction,
+} from "react";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SearchPage from "./pages/SearchPage";
 import Header from "./components/Header";
 
-export const AuthContext = createContext();
+interface AuthContextType {
+  user: string | null;
+  isAuthenticated: boolean;
+  handleLogin: (userData: { username: string; token: string }) => void;
+  handleLogout: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAuthenticated: false,
+  handleLogin: () => {},
+  handleLogout: () => {},
+});
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const theme = useMemo(
@@ -102,8 +120,11 @@ function App() {
     }
   }, []);
 
-  const handleLogin = (userData) => {
-    if (userData && userData.username) {
+  const handleLogin = (userData: {
+    username: SetStateAction<string | null>;
+    token: string;
+  }) => {
+    if (userData && typeof userData.username === "string") {
       setUser(userData.username);
       setIsAuthenticated(true);
       localStorage.setItem("token", userData.token);
@@ -164,7 +185,9 @@ function App() {
             }}
           >
             <Header />
-            <Divider sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }} />
+            <Divider
+              sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+            />
             <Paper
               sx={{
                 flex: 1,
