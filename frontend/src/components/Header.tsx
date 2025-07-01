@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Avatar, Fade, Slide } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { useMediaQuery } from "@mui/material";
-import { useContext } from "react";
+import { Box, Typography, Avatar, Fade, Slide, Button } from "@mui/material";
 import { FaGithub } from "react-icons/fa";
 import { FaSearchengin } from "react-icons/fa6";
 
@@ -15,31 +12,17 @@ const Header = () => {
       sx={{
         padding: 2,
         gap: 1,
-        backgroundColor: "rgb(242, 242, 221)",
-        justifyContent: "center",
+        backgroundColor: "transparent",
+        justifyContent: "left",
         display: "flex",
-        alignItems: "center",
+        alignItems: "left",
       }}
     >
-      <Typography variant="h3" color="rgb(19, 50, 61)">
-        {text.split("").map((char, index) => (
-          <span
-            key={index}
-            className="char-animation"
-            style={{
-              display: "inline-block",
-              animationDelay: `${index * 0.1}s`,
-            }}
-          >
-            {char === " " ? "\u00A0" : char}
-          </span>
-        ))}
-      </Typography>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Avatar
           className="avatar-pulse"
           sx={{
-            bgcolor: "rgb(121, 112, 219)",
+            bgcolor: "rgb(133, 126, 202)",
             marginRight: 1,
           }}
         >
@@ -47,6 +30,50 @@ const Header = () => {
           <FaSearchengin size={25} color="white" />
         </Avatar>
       </Box>
+      <Typography variant="h4" color="rgb(235, 221, 255)">
+        {text.split("").map((char, index) => (
+          <span
+            key={index}
+            className="char-animation"
+            style={{
+              display: "inline-block",
+              animationDelay: `${index * 0.2}s`,
+            }}
+          >
+            {char === " " ? "\u00A0" : char}
+          </span>
+        ))}
+      </Typography>
+
+      <Fade in={true} timeout={2000} style={{ marginLeft: "auto", padding: "0 16px", marginTop: "8px" }}>
+        <Box>
+          <Button
+            variant="text"
+            sx={{
+              marginLeft: "auto",
+              backgroundColor: "rgba(121, 112, 219, 0)",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: "bold",
+            }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="text"
+            sx={{
+              marginLeft: 1,
+              backgroundColor: "rgba(63, 56, 141, 0.92)",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: "bold",
+            }}
+          >
+            Register
+          </Button>
+        </Box>
+      </Fade>
+
       <style>{`
         .char-animation {
           animation: fadeInUpContinuous 4s ease infinite;

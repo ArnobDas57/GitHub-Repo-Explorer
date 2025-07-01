@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,44 +8,40 @@ import {
 import {
   Box,
   CssBaseline,
-  Typography,
   Paper,
   Alert,
   ThemeProvider,
   createTheme,
+  Divider,
+  Fade
 } from "@mui/material";
-import { useEffect, useState, createContext, useMemo, use } from "react";
+import { useEffect, useState, createContext, useMemo } from "react";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SearchPage from "./pages/SearchPage";
 import Header from "./components/Header";
 
-export const ThemeContext = createContext();
 export const AuthContext = createContext();
 
 function App() {
-  const [mode, setMode] = useState("light");
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-  };
 
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
+          mode: "light",
           primary: {
-            main: mode === "light" ? "rgb(30, 72, 144)" : "#rgb(5, 13, 26)",
+            main: "#1e4890",
           },
           secondary: {
-            main: mode === "light" ? "rgb(166, 218, 208)" : "#rgb(30, 222, 132)",
+            main: "#a6dad0",
           },
           background: {
-            default: mode === "light" ? "rgb(10, 18, 29)" : "#121212",
-            paper: mode === "light" ? "rgb(255, 255, 255)" : "#1e1e1e",
+            default: "#f5f5f5",
+            paper: "#ffffff",
           },
         },
         typography: {
@@ -54,17 +51,42 @@ function App() {
           MuiCssBaseline: {
             styleOverrides: {
               body: {
-                // Dynamic background based on theme mode
-                background:
-                  mode === "light"
-                    ? "linear-gradient(to right, rgb(243, 240, 183), rgb(243, 240, 183))"
-                    : "linear-gradient(to right, #2c3e50, #34495e)", // Darker gradient for dark mode
+                margin: 0,
+                padding: 0,
+                minHeight: "100vh",
+                overflow: "hidden",
+              },
+              // Create animated wave background
+              "@keyframes waveAnimation": {
+                "0%": {
+                  transform: "translateX(0) translateY(0) scale(1)",
+                },
+                "33%": {
+                  transform: "translateX(-20px) translateY(-10px) scale(1.02)",
+                },
+                "66%": {
+                  transform: "translateX(10px) translateY(5px) scale(0.98)",
+                },
+                "100%": {
+                  transform: "translateX(0) translateY(0) scale(1)",
+                },
+              },
+              "@keyframes waveAnimation2": {
+                "0%": {
+                  transform: "translateX(0) translateY(0) scale(1.01)",
+                },
+                "50%": {
+                  transform: "translateX(15px) translateY(-8px) scale(0.99)",
+                },
+                "100%": {
+                  transform: "translateX(0) translateY(0) scale(1.01)",
+                },
               },
             },
           },
         },
       }),
-    [mode]
+    []
   );
 
   useEffect(() => {
@@ -98,69 +120,101 @@ function App() {
 
   return (
     <Router>
-      <ThemeContext.Provider value={{ mode, toggleTheme }}>
-        <AuthContext.Provider
-          value={{ user, isAuthenticated, handleLogin, handleLogout }}
-        >
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Box
+      <AuthContext.Provider
+        value={{ user, isAuthenticated, handleLogin, handleLogout }}
+      >
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+              position: "relative",
+              // Animated background layers
+              "&::before": {
+                content: '""',
+                position: "fixed",
+                top: "-10%",
+                left: "-10%",
+                right: "-10%",
+                bottom: "-10%",
+                backgroundImage: `url('/assets/bg1.jpg')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                animation: "waveAnimation 8s ease-in-out infinite",
+                zIndex: -2,
+              },
+              "&::after": {
+                content: '""',
+                position: "fixed",
+                top: "-10%",
+                left: "-10%",
+                right: "-10%",
+                bottom: "-10%",
+                backgroundImage: `url('/assets/bg1.jpg')`,
+                backgroundSize: "105% 105%",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                opacity: 0.3,
+                animation: "waveAnimation2 12s ease-in-out infinite reverse",
+                zIndex: -1,
+              },
+            }}
+          >
+            <Header />
+            <Divider sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }} />
+            <Paper
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh",
+                flex: 1,
+                padding: 2,
+                margin: 2,
+                backgroundColor: "transparent",
+                borderRadius: 2,
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <Header />
-              <Paper
-                sx={{
-                  flex: 1,
-                  padding: 2,
-                  margin: 2,
-                  backgroundColor: "rgb(249, 248, 227)",
-                }}
-              >
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/favorites" element={<FavoritesPage />} />
-                  <Route
-                    path="/"
-                    element={
-                      isAuthenticated ? (
-                        <Navigate to="/search" replace />
-                      ) : (
-                        <Navigate to="/login" replace />
-                      )
-                    }
-                  />
-                  <Route
-                    path="*"
-                    element={
-                      <Box
-                        sx={{
-                          p: 2,
-                          width: 250,
-                          mx: "auto",
-                          mt: 5,
-                          borderRadius: "4px",
-                          backgroundColor: theme.palette.background.paper,
-                          textAlign: "center",
-                        }}
-                      >
-                        <Alert variant="filled" severity="error">
-                          404 - Page Not Found
-                        </Alert>
-                      </Box>
-                    }
-                  />
-                </Routes>
-              </Paper>
-            </Box>
-          </ThemeProvider>
-        </AuthContext.Provider>
-      </ThemeContext.Provider>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
+                <Route
+                  path="/"
+                  element={
+                    isAuthenticated ? (
+                      <Navigate to="/search" replace />
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <Box
+                      sx={{
+                        p: 2,
+                        width: 250,
+                        mx: "auto",
+                        mt: 5,
+                        borderRadius: "4px",
+                        backgroundColor: theme.palette.background.paper,
+                        textAlign: "center",
+                      }}
+                    >
+                      <Alert variant="filled" severity="error">
+                        404 - Page Not Found
+                      </Alert>
+                    </Box>
+                  }
+                />
+              </Routes>
+            </Paper>
+          </Box>
+        </ThemeProvider>
+      </AuthContext.Provider>
     </Router>
   );
 }

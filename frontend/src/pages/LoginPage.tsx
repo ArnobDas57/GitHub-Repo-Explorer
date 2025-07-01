@@ -13,13 +13,14 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { AuthContext } from "../App";
 
 const LoginPage = () => {
   const { handleLogin } = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -35,6 +36,7 @@ const LoginPage = () => {
       handleLogin(response.data);
       navigate("/search");
     } catch (err) {
+      console.log("Login error:", err);
       setError("Invalid username or password");
     } finally {
       setLoading(false);
