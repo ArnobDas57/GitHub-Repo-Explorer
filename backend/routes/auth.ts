@@ -78,7 +78,7 @@ authRouter.post(
       const token = jwt.sign(
         { id: newUser.user_id, username: newUser.username },
         jwtSecret,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" }
+        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" } as jwt.SignOptions
       );
 
       res.status(201).json({
@@ -133,10 +133,10 @@ authRouter.post(
 
       const token = jwt.sign(
         { id: user.user_id, username: user.username },
-        jwtSecret as string,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" }
+        jwtSecret,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" } as jwt.SignOptions
       );
-
+      
       res.status(200).json({ token, username: user.username });
     } catch (error) {
       console.error("Login Error:", error);

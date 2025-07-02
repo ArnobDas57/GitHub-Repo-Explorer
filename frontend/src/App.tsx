@@ -15,32 +15,13 @@ import {
   Divider,
   Fade,
 } from "@mui/material";
-import {
-  useEffect,
-  useState,
-  createContext,
-  useMemo,
-  type SetStateAction,
-} from "react";
+import { useEffect, useState, useMemo, type SetStateAction } from "react";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SearchPage from "./pages/SearchPage";
 import Header from "./components/Header";
-
-interface AuthContextType {
-  user: string | null;
-  isAuthenticated: boolean;
-  handleLogin: (userData: { username: string; token: string }) => void;
-  handleLogout: () => void;
-}
-
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  handleLogin: () => {},
-  handleLogout: () => {},
-});
+import { AuthContext } from "./contexts/AuthContext";
 
 function App() {
   const [user, setUser] = useState<string | null>(null);

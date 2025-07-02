@@ -2,11 +2,9 @@ import { Box, Typography, Avatar, Fade, Button } from "@mui/material";
 import { FaGithub } from "react-icons/fa";
 import { FaSearchengin } from "react-icons/fa6";
 import { useNavigate, Link } from "react-router-dom";
-import { AuthContext } from "../App";
+import { AuthContext } from "../contexts/AuthContext";
 import { useContext, useState } from "react";
-import { GrLogout } from "react-icons/gr";
 
-// Option 1: Simple CSS Animation with keyframes
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);

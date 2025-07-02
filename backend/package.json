@@ -4,9 +4,9 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node src/server.ts",
+    "dev": "ts-node server.ts",
     "build": "tsc",
-    "start": "npm run build && node dist/server.js"
+    "start": "ts-node --esm server.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",

@@ -8,8 +8,9 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Fade,
 } from "@mui/material";
-import { AuthContext } from "../App";
+import { AuthContext } from "../contexts/AuthContext";
 import { Lock, Email } from "@mui/icons-material";
 
 const LoginPage = () => {
@@ -29,7 +30,7 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const response = await axiosInstance.post("/login", {
+      const response = await axiosInstance.post("auth/login", {
         identifier,
         password,
       });
@@ -129,9 +130,11 @@ const LoginPage = () => {
           />
 
           {error && (
-            <Alert severity="error" sx={{ marginBottom: 2 }}>
-              {error}
-            </Alert>
+            <Fade in={!!error} timeout={500}>
+              <Alert severity="error" sx={{ marginBottom: 2 }}>
+                {error}
+              </Alert>
+            </Fade>
           )}
           <Button
             type="submit"
@@ -167,22 +170,7 @@ const LoginPage = () => {
             {loading ? <CircularProgress size={24} /> : "Login"}
           </Button>
         </form>
-        <Typography
-          onClick={() => navigate("/forgot-password")}
-          variant="body2"
-          sx={{
-            textAlign: "right",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-            color: "white",
-            fontWeight: "bold",
-            "&:hover": {
-              color: "rgb(236, 160, 84)",
-            },
-          }}
-        >
-          Forgot Password?
-        </Typography>
+
         <Typography
           onClick={() => navigate("/register")}
           variant="body2"
