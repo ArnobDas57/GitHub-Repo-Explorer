@@ -1,5 +1,6 @@
 import React from "react";
 import { createContext, useState, useEffect, type ReactNode } from "react";
+import { axiosInstance } from "../utils/axiosInstance";
 
 export type User = {
   id: string;
@@ -46,16 +47,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     try {
-      const response = await fetch("/api/auth/verify", {
-        method: "GET",
+      const response = await axiosInstance.get("/auth/verify", {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         setUser({
           id: data.user.id,
           username: data.user.username,
