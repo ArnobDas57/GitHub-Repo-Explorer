@@ -13,20 +13,18 @@ import {
   ThemeProvider,
   createTheme,
   Divider,
+  CircularProgress,
 } from "@mui/material";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SearchPage from "./pages/SearchPage";
 import Header from "./components/Header";
-import type { User } from "./contexts/AuthContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, AuthContext } from "./contexts/AuthContext"; // Import AuthContext itself
+import AuthConditionalRoutes from "./routing/AuthConditionalRoutes";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const theme = useMemo(
     () =>
       createTheme({
@@ -88,24 +86,6 @@ function App() {
     []
   );
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUsername = localStorage.getItem("username");
-
-    if (token && storedUsername) {
-      setUser({
-        id: "",
-        email: "",
-        username: storedUsername,
-        token,
-      });
-      setIsAuthenticated(true);
-    } else {
-      setUser(null);
-      setIsAuthenticated(false);
-    }
-  }, []);
-
   return (
     <Router>
       <AuthProvider>
@@ -163,60 +143,7 @@ function App() {
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
               }}
             >
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route
-                  path="/search"
-                  element={
-                    isAuthenticated ? (
-                      <SearchPage></SearchPage>
-                    ) : (
-                      <Navigate to="/login" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="/favorites"
-                  element={
-                    isAuthenticated ? (
-                      <FavoritesPage />
-                    ) : (
-                      <Navigate to="/login" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="/"
-                  element={
-                    isAuthenticated ? (
-                      <Navigate to="/search" replace />
-                    ) : (
-                      <Navigate to="/login" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="*"
-                  element={
-                    <Box
-                      sx={{
-                        p: 2,
-                        width: 250,
-                        mx: "auto",
-                        mt: 5,
-                        borderRadius: "4px",
-                        backgroundColor: theme.palette.background.paper,
-                        textAlign: "center",
-                      }}
-                    >
-                      <Alert variant="filled" severity="error">
-                        404 - Page Not Found
-                      </Alert>
-                    </Box>
-                  }
-                />
-              </Routes>
+              <AuthConditionalRoutes theme={theme} />
             </Paper>
           </Box>
         </ThemeProvider>

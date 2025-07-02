@@ -1,7 +1,7 @@
 import { Box, Typography, Avatar, Fade, Button } from "@mui/material";
 import { FaGithub } from "react-icons/fa";
 import { FaSearchengin } from "react-icons/fa6";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { Logout, Search, Favorite } from "@mui/icons-material";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { useContext } from "react";
@@ -10,7 +10,8 @@ import LoadingSpinner from "./LoadingSpinner";
 const Header = () => {
   const navigate = useNavigate();
 
-  const { isAuthenticated, user, handleLogout, isLoading } = useContext(AuthContext);
+  const { isAuthenticated, user, handleLogout, isLoading } =
+    useContext(AuthContext);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -95,7 +96,8 @@ const Header = () => {
                 },
               }}
             >
-              Search Repositories
+              <Search sx={{ marginRight: 0.5 }} />
+              Search
             </Button>
             <Button
               onClick={() => navigate("/favorites")}
@@ -111,6 +113,7 @@ const Header = () => {
                 },
               }}
             >
+              <Favorite sx={{ marginRight: 0.5 }} />
               Favorite Repositories
             </Button>
           </Box>
@@ -158,7 +161,7 @@ const Header = () => {
                 }}
               >
                 Logout
-                <LogoutIcon sx={{ marginLeft: 1 }} />
+                <Logout sx={{ marginLeft: 1 }} />
               </Button>
             </Box>
           ) : (
