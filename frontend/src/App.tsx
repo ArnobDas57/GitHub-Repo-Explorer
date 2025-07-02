@@ -13,18 +13,18 @@ import {
   ThemeProvider,
   createTheme,
   Divider,
-  Fade,
 } from "@mui/material";
-import { useEffect, useState, useMemo, type SetStateAction } from "react";
+import { useEffect, useState, useMemo } from "react";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SearchPage from "./pages/SearchPage";
 import Header from "./components/Header";
-import { AuthContext } from "./contexts/AuthContext";
+import type { User } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const theme = useMemo(
@@ -93,7 +93,12 @@ function App() {
     const storedUsername = localStorage.getItem("username");
 
     if (token && storedUsername) {
-      setUser(storedUsername);
+      setUser({
+        id: "",
+        email: "",
+        username: storedUsername,
+        token,
+      });
       setIsAuthenticated(true);
     } else {
       setUser(null);
@@ -101,30 +106,9 @@ function App() {
     }
   }, []);
 
-  const handleLogin = (userData: {
-    username: SetStateAction<string | null>;
-    token: string;
-  }) => {
-    if (userData && typeof userData.username === "string") {
-      setUser(userData.username);
-      setIsAuthenticated(true);
-      localStorage.setItem("token", userData.token);
-      localStorage.setItem("username", userData.username);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    setIsAuthenticated(false);
-    setUser(null);
-  };
-
   return (
     <Router>
-      <AuthContext.Provider
-        value={{ user, isAuthenticated, handleLogin, handleLogout }}
-      >
+      <AuthProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Box
@@ -182,8 +166,26 @@ function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/favorites" element={<FavoritesPage />} />
+                <Route
+                  path="/search"
+                  element={
+                    isAuthenticated ? (
+                      <SearchPage></SearchPage>
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="/favorites"
+                  element={
+                    isAuthenticated ? (
+                      <FavoritesPage />
+                    ) : (
+                      <Navigate to="/login" replace />
+                    )
+                  }
+                />
                 <Route
                   path="/"
                   element={
@@ -218,7 +220,7 @@ function App() {
             </Paper>
           </Box>
         </ThemeProvider>
-      </AuthContext.Provider>
+      </AuthProvider>
     </Router>
   );
 }

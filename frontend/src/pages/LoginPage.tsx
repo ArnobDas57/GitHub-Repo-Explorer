@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, type FormEvent } from "react";
 import { axiosInstance } from "../utils/axiosInstance";
 import {
   Box,
@@ -22,9 +22,7 @@ const LoginPage = () => {
 
   const { handleLogin } = useContext(AuthContext);
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError("");

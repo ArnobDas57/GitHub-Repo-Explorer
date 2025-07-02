@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import supabase from "../db";
+import { verifyToken } from "../middleware/auth";
 
 dotenv.config();
 
@@ -136,11 +137,43 @@ authRouter.post(
         jwtSecret,
         { expiresIn: process.env.JWT_EXPIRES_IN || "24h" } as jwt.SignOptions
       );
-      
+
       res.status(200).json({ token, username: user.username });
     } catch (error) {
       console.error("Login Error:", error);
       res.status(500).json({ message: "Server error." });
+    }
+  }
+);
+
+authRouter.get(
+  "/verify",
+  verifyToken,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user.id;
+
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("user_id, username, email")
+        .eq("user_id", userId)
+        .single();
+
+      if (error || !user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      res.status(200).json({
+        user: {
+          id: user.user_id,
+          username: user.username,
+          email: user.email,
+        },
+      });
+    } catch (error) {
+      console.error("User verification error:", error);
+      res.status(500).json({ message: "Server error" });
     }
   }
 );

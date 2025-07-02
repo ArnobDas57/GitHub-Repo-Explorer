@@ -1,33 +1,24 @@
 import { Box, Typography, Avatar, Fade, Button } from "@mui/material";
 import { FaGithub } from "react-icons/fa";
 import { FaSearchengin } from "react-icons/fa6";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import { useContext, useState } from "react";
+import { useContext } from "react";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Header = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user, handleLogout, isLoading } = useContext(AuthContext);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   const text = "Repo Explorer";
 
-  const handleAvatarClick = () => {
-    if (isAuthenticated) {
-      navigate("/search");
-    } else {
-      navigate("/login");
-    }
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleLogoutClick = () => {
-    handleMenuClose();
     handleLogout();
     navigate("/login");
   };
@@ -80,38 +71,133 @@ const Header = () => {
         </Typography>
       </Link>
 
+      <Box>
+        {isAuthenticated ? (
+          <Box
+            sx={{
+              marginLeft: 5,
+              marginTop: 1.3,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Button
+              onClick={() => navigate("/search")}
+              variant="text"
+              sx={{
+                backgroundColor: "rgba(63, 56, 141, 0.92)",
+                color: "white",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: "rgba(63, 56, 141, 1)",
+                },
+              }}
+            >
+              Search Repositories
+            </Button>
+            <Button
+              onClick={() => navigate("/favorites")}
+              variant="text"
+              sx={{
+                marginleft: 2,
+                backgroundColor: "rgba(63, 56, 141, 0.92)",
+                color: "white",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: "rgba(63, 56, 141, 1)",
+                },
+              }}
+            >
+              Favorite Repositories
+            </Button>
+          </Box>
+        ) : (
+          <></>
+        )}
+      </Box>
+
       <Fade
         in={true}
         timeout={2000}
         style={{ marginLeft: "auto", padding: "0 16px", marginTop: "8px" }}
       >
         <Box>
-          <Button
-            onClick={() => navigate("/login")}
-            variant="text"
-            sx={{
-              marginLeft: "auto",
-              backgroundColor: "rgba(121, 112, 219, 0)",
-              color: "white",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-          >
-            Login
-          </Button>
-          <Button
-            onClick={() => navigate("/register")}
-            variant="text"
-            sx={{
-              marginLeft: 1,
-              backgroundColor: "rgba(63, 56, 141, 0.92)",
-              color: "white",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-          >
-            Register
-          </Button>
+          {isAuthenticated ? (
+            // Show user info and logout when authenticated
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar
+                sx={{
+                  bgcolor: "rgb(121, 112, 219)",
+                  cursor: "pointer",
+                  width: 32,
+                  height: 32,
+                }}
+              >
+                {getFirstLetter(user?.username || "")}
+              </Avatar>
+              <Typography
+                variant="body1"
+                sx={{ color: "white", fontWeight: "medium" }}
+              >
+                {user?.username}
+              </Typography>
+              <Button
+                onClick={handleLogoutClick}
+                variant="text"
+                sx={{
+                  backgroundColor: "rgba(63, 56, 141, 0.92)",
+                  color: "white",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "rgba(63, 56, 141, 1)",
+                  },
+                }}
+              >
+                Logout
+                <LogoutIcon sx={{ marginLeft: 1 }} />
+              </Button>
+            </Box>
+          ) : (
+            // Show login/register buttons when not authenticated
+            <Box>
+              <Button
+                onClick={() => navigate("/login")}
+                variant="text"
+                sx={{
+                  marginLeft: "auto",
+                  backgroundColor: "rgba(121, 112, 219, 0)",
+                  color: "white",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "rgba(121, 112, 219, 0.1)",
+                  },
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                onClick={() => navigate("/register")}
+                variant="text"
+                sx={{
+                  marginLeft: 1,
+                  backgroundColor: "rgba(63, 56, 141, 0.92)",
+                  color: "white",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "rgba(63, 56, 141, 1)",
+                  },
+                }}
+              >
+                Register
+              </Button>
+            </Box>
+          )}
         </Box>
       </Fade>
 

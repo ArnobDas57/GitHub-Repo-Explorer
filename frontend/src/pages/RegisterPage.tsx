@@ -242,7 +242,7 @@ const RegisterPage = () => {
           </Button>
         </form>
         <Typography
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/login")}
           variant="body2"
           sx={{
             mt: 1,
