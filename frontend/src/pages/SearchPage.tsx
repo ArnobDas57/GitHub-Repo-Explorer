@@ -19,6 +19,7 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import { keyframes } from "@emotion/react";
 import axios from "axios";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { axiosInstance } from "../utils/axiosInstance";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -36,9 +37,7 @@ function ModelViewer({ modelPath }: { modelPath: string }) {
     <Box
       sx={{
         borderRadius: 2,
-        overflow: "hidden",
-        width: "200px",
-        height: "200px",
+        height: 180,
       }}
     >
       <Canvas
@@ -89,14 +88,36 @@ const SearchPage = () => {
   const [user, setUser] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [errMessage, setErrMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const [repos, setRepos] = useState<Array<GitHubRepo>>([]);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+
+  const handleFavorite = async (repo: GitHubRepo): Promise<void> => {
+    setLoading(true);
+    setErrMessage("");
+    setSuccessMessage("");
+
+    try {
+      await axiosInstance.post("/favorites", { repo });
+      setSuccessMessage("Repository successfully saved to favorites!");
+    } catch (error) {
+      console.error("Failed to favorite repository", error);
+      setErrMessage(
+        `Error saving repository to favorites: ${
+          error instanceof Error ? error.message : "An unknown error occurred"
+        }`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = async (userToSearch: string): Promise<void> => {
     const GITHUB_REPOS_LINK: string = `https://api.github.com/users/${userToSearch}/repos`;
 
     setLoading(true);
     setErrMessage("");
+    setSuccessMessage("");
     setRepos([]);
 
     try {
@@ -131,10 +152,8 @@ const SearchPage = () => {
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
           padding: 2,
           borderRadius: 2,
-          width: "100%",
-          maxWidth: 1000,
+          maxWidth: "90%",
           margin: "auto",
-          overflow: "auto",
         }}
       >
         {/* Header section with Typography and 3D Model side by side */}
@@ -144,14 +163,13 @@ const SearchPage = () => {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            marginBottom: 2,
           }}
         >
           {/* Text Section */}
           <Box sx={{ marginLeft: 2 }}>
             <Fade in={true} timeout={1000}>
               <Typography
-                variant="h4"
+                variant="h5"
                 color="rgb(255, 255, 255)"
                 sx={{
                   textAlign: { xs: "center", md: "left" },
@@ -169,29 +187,10 @@ const SearchPage = () => {
           </Box>
 
           {/* 3D Model Section */}
-          <Box
-            sx={{
-              flexShrink: 0,
-              marginLeft: { xs: 0, md: 2 },
-              marginTop: { xs: 2, md: 0 },
-            }}
-          >
+          <Box>
             <Suspense
               fallback={
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "200px",
-                    width: "200px",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                    backdropFilter: "blur(5px)",
-                    borderRadius: 2,
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    flexDirection: "column",
-                  }}
-                >
+                <Box>
                   <CircularProgress size={30} />
                 </Box>
               }
@@ -216,11 +215,11 @@ const SearchPage = () => {
         </Box>
 
         <Divider
-          sx={{ margin: 5, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+          sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
         />
 
         {/* Search GitHub User Section */}
-        <Box sx={{ padding: 2 }}>
+        <Box sx={{ padding: 1 }}>
           {/* Top heading: Search GitHub User with icon */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <FaGithub
@@ -338,6 +337,15 @@ const SearchPage = () => {
                     backgroundColor: "rgba(173, 166, 247, 0.7)",
                   },
                   border: "1px solid rgba(255, 255, 255, 0.2)",
+                  "&:focus-visible": {
+                    outline: "none",
+                    boxShadow: "0 0 0 3px rgba(48, 247, 204, 0.6)",
+                    borderColor: "rgba(48, 247, 204, 0.8)",
+                  },
+                  "&:active": {
+                    backgroundColor: "rgba(173, 166, 247, 0.9)",
+                    boxShadow: "none",
+                  },
                 }}
               >
                 {popularUser}
@@ -346,6 +354,29 @@ const SearchPage = () => {
           </Box>
         </Box>
       </Paper>
+
+      {successMessage && (
+        <Box
+          sx={{
+            marginTop: 2,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Alert
+            severity="success"
+            variant="filled"
+            sx={{
+              width: "fit-content",
+              backgroundColor: "rgba(76, 175, 80, 0.8)",
+              color: "white",
+              fontWeight: "bold",
+            }}
+          >
+            {successMessage}
+          </Alert>
+        </Box>
+      )}
 
       {/* Conditional Rendering for Search Results / Status */}
       {loading ? (
@@ -386,7 +417,22 @@ const SearchPage = () => {
                 marginBottom: 10,
               }}
             >
-              <Box sx={{ mx: "auto" }}>
+              <Box
+                sx={{
+                  mx: "auto",
+                  backgroundColor: "rgba(90, 17, 123, 0.65)",
+                  borderRadius: "6px",
+                  padding: 2,
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.4)",
+                  border: "none",
+                  transition:
+                    "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 15px 40px rgba(0, 0, 0, 0.5)",
+                  },
+                }}
+              >
                 <Typography
                   color="white"
                   variant="h4"
@@ -407,9 +453,9 @@ const SearchPage = () => {
                 <Card
                   variant="outlined"
                   sx={{
-                    backgroundColor: "rgb(74, 25, 97)",
+                    backgroundColor: "rgba(90, 17, 123, 0.65)",
                     borderRadius: "6px",
-                    padding: "1",
+                    padding: 1,
                     boxShadow: "0 10px 30px rgba(0, 0, 0, 0.4)",
                     border: "none",
                     transition:
@@ -429,7 +475,6 @@ const SearchPage = () => {
                           "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
-                        backgroundSize: "200% auto",
                         animation: `${gradientAnimation} 3s linear infinite`,
                       }}
                     >
@@ -440,61 +485,145 @@ const SearchPage = () => {
               </Box>
             </Box>
           </Fade>
-
-          <Box
-            sx={{
-              marginTop: 10,
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            {repos.map((repo: GitHubRepo) => (
-              <Box key={repo.id} sx={{ m: 1 }}>
-                {" "}
-                {/* Added key and margin */}
-                <Card
-                  sx={{
-                    p: 2,
-                    minWidth: 280,
-                    maxWidth: 350,
-                    boxShadow: "3px 3px 5px rgba(0,0,0,0.2)",
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    color: "white",
-                  }}
-                >
-                  <Typography variant="h6" sx={{ mb: 1 }}>
-                    {repo.name}
-                  </Typography>
-                  {repo.description && (
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      {repo.description}
-                    </Typography>
-                  )}
-                  <Typography variant="body2">
-                    ⭐ {repo.stargazers_count}
-                  </Typography>
-                  <Typography variant="body2">
-                    Language: {repo.language || "N/A"}
-                  </Typography>
-                  <Button
-                    href={repo.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="outlined"
-                    size="small"
+          <Fade in={true} timeout={2000}>
+            <Box
+              sx={{
+                marginTop: 10,
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(auto-fill, minmax(300px, 1fr))",
+                },
+                gap: {
+                  xs: 2,
+                  md: 3,
+                },
+                justifyContent: "center",
+                maxWidth: 1200,
+                margin: "0 auto",
+                paddingX: { xs: 2, sm: 3 },
+              }}
+            >
+              {repos.map((repo: GitHubRepo) => (
+                <Box key={repo.id}>
+                  {" "}
+                  {/* Added key and margin */}
+                  <Card
                     sx={{
-                      mt: 2,
+                      p: 2.5,
+                      minWidth: 280,
+                      maxWidth: 350,
+                      boxShadow: "3px 3px 5px rgba(25, 1, 66, 0.8)",
+                      backgroundColor: "rgba(136, 96, 230, 0.74)",
                       color: "white",
-                      borderColor: "rgba(255,255,255,0.3)",
+                      gap: 2,
                     }}
                   >
-                    View on GitHub
-                  </Button>
-                </Card>
-              </Box>
-            ))}
-          </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mb: 1,
+                        background:
+                          "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundSize: "200% auto",
+                        animation: `${gradientAnimation} 5s linear infinite`,
+                      }}
+                    >
+                      {repo.name}
+                    </Typography>
+                    {repo.description && (
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        {repo.description}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">
+                      ⭐ {repo.stargazers_count}
+                    </Typography>
+                    <Typography variant="body2">
+                      Language: {repo.language || "N/A"}
+                    </Typography>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Button
+                        href={repo.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          color: "white",
+                          borderColor: "rgb(0, 0, 0)",
+                          background:
+                            "linear-gradient(-45deg, #FE6B8B, #FF8E53, #FE6B8B, #FF8E53)",
+                          backgroundSize: "400% 400%",
+                          ":hover": {
+                            backgroundPosition: "100% 50%",
+                            boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
+                            transform: "scale(1.05)",
+                          },
+                          animation: "gradientShift 3s ease infinite",
+                          "@keyframes gradientShift": {
+                            "0%": {
+                              backgroundPosition: "0% 50%",
+                            },
+                            "50%": {
+                              backgroundPosition: "100% 50%",
+                            },
+                            "100%": {
+                              backgroundPosition: "0% 50%",
+                            },
+                          },
+                        }}
+                      >
+                        View on GitHub
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          handleFavorite(repo);
+                        }}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          color: "white",
+                          borderColor: "rgb(0, 0, 0)",
+                          background:
+                            "linear-gradient(-45deg, #FE6B8B, #FF8E53, #FE6B8B, #FF8E53)",
+                          backgroundSize: "400% 400%",
+                          ":hover": {
+                            backgroundPosition: "100% 50%",
+                            boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
+                            transform: "scale(1.05)",
+                          },
+                          animation: "gradientShift 3s ease infinite",
+                          "@keyframes gradientShift": {
+                            "0%": {
+                              backgroundPosition: "0% 50%",
+                            },
+                            "50%": {
+                              backgroundPosition: "100% 50%",
+                            },
+                            "100%": {
+                              backgroundPosition: "0% 50%",
+                            },
+                          },
+                        }}
+                      >
+                        Save to favorites
+                      </Button>
+                    </Box>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
+          </Fade>
         </Box>
       ) : hasSearched && repos.length === 0 && !errMessage ? (
         <Box
