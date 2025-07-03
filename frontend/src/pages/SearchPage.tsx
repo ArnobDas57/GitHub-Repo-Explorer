@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import {
   Box,
   Button,
@@ -8,12 +8,17 @@ import {
   Divider,
   CircularProgress,
   Fade,
+  Card,
+  CardContent,
+  Alert,
 } from "@mui/material";
 import { Search, TrendingUp } from "@mui/icons-material";
 import { FaGithub } from "react-icons/fa";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { keyframes } from "@emotion/react";
+import axios from "axios";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -53,15 +58,12 @@ function ModelViewer({ modelPath }: { modelPath: string }) {
           });
         }}
       >
-        {/* Simplified lighting */}
         <ambientLight intensity={2} />
 
-        {/* Your Meshy model */}
         <Suspense fallback={null}>
           <MeshyModel modelPath={modelPath} />
         </Suspense>
 
-        {/* Controls to rotate/zoom */}
         <OrbitControls
           enablePan={true}
           enableZoom={false}
@@ -74,20 +76,65 @@ function ModelViewer({ modelPath }: { modelPath: string }) {
   );
 }
 
+interface GitHubRepo {
+  id: number;
+  name: string;
+  html_url: string;
+  description: string | null;
+  stargazers_count: number;
+  language: string | null;
+}
+
 const SearchPage = () => {
+  const [user, setUser] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errMessage, setErrMessage] = useState<string>("");
+  const [repos, setRepos] = useState<Array<GitHubRepo>>([]);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+
+  const handleSearch = async (userToSearch: string): Promise<void> => {
+    const GITHUB_REPOS_LINK: string = `https://api.github.com/users/${userToSearch}/repos`;
+
+    setLoading(true);
+    setErrMessage("");
+    setRepos([]);
+
+    try {
+      const res = await axios.get(GITHUB_REPOS_LINK);
+      setRepos(res.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setErrMessage(
+          `GitHub user "${user}" not found or has no public repositories.`
+        );
+      } else {
+        setErrMessage(
+          `Error retrieving repositories: ${
+            error instanceof Error ? error.message : "An unknown error occurred"
+          }`
+        );
+        console.error("Failed to retrieve repositories", error);
+      }
+    } finally {
+      setLoading(false);
+      setHasSearched(true);
+    }
+  };
+
   return (
     <Box>
       <Paper
         sx={{
-          backgroundColor: "rgba(156, 116, 215, 0.28)", // Made semi-transparent
-          backdropFilter: "blur(10px)", // Added blur effect
-          border: "1px solid rgba(255, 255, 255, 0.2)", // Subtle border
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)", // Soft shadow
+          backgroundColor: "rgba(156, 116, 215, 0.28)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
           padding: 2,
           borderRadius: 2,
           width: "100%",
           maxWidth: 1000,
           margin: "auto",
+          overflow: "auto",
         }}
       >
         {/* Header section with Typography and 3D Model side by side */}
@@ -95,9 +142,9 @@ const SearchPage = () => {
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between", // Distribute space between items
-            flexWrap: "wrap", // Allow items to wrap on smaller screens
-            marginBottom: 2, // Add some space below the header section
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            marginBottom: 2,
           }}
         >
           {/* Text Section */}
@@ -154,7 +201,7 @@ const SearchPage = () => {
           </Box>
         </Box>
 
-        {/* Description Section (adjusted based on image layout) */}
+        {/* Description Section */}
         <Box
           sx={{
             ml: { xs: 0, md: 2 },
@@ -172,7 +219,7 @@ const SearchPage = () => {
           sx={{ margin: 5, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
         />
 
-        {/* New: Search GitHub User Section */}
+        {/* Search GitHub User Section */}
         <Box sx={{ padding: 2 }}>
           {/* Top heading: Search GitHub User with icon */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -201,59 +248,60 @@ const SearchPage = () => {
               display: "flex",
               alignItems: "center",
               gap: 2,
-              mb: 3, // Margin bottom for spacing with popular users
-              flexWrap: "wrap", // Allow wrapping on small screens
+              mb: 3,
+              flexWrap: "wrap",
             }}
           >
             <TextField
-              label="GitHub Username" // Label above the input
-              placeholder="Enter GitHub username (e.g., octocat)" // Placeholder text inside
+              label="GitHub Username"
+              placeholder="Enter GitHub username (e.g., google)"
               variant="outlined"
-              margin="none" // Remove default TextField vertical margins for precise control
+              margin="none"
+              value={user}
+              onChange={(e) => {
+                setUser(e.target.value);
+              }}
               sx={{
-                flexGrow: 1, // Allows TextField to take remaining space
+                flexGrow: 1,
                 "& .MuiOutlinedInput-root": {
-                  backgroundColor: "rgba(255, 255, 255, 0.9)", // Almost white background for input
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
                   backdropFilter: "blur(5px)",
-                  height: "50px", // Match button height for alignment
-                  borderRadius: 1, // Slightly rounded corners
+                  height: "50px",
+                  borderRadius: 1,
                 },
-                // Colors for the label and input text
                 "& .MuiInputLabel-root": {
-                  color: "rgba(0, 0, 0, 0.6)", // Dark grey for label
+                  color: "rgba(0, 0, 0, 0.6)",
                 },
                 "& .MuiInputLabel-root.Mui-focused": {
-                  color: "black", // Darker label when focused
+                  color: "black",
                 },
                 "& .MuiOutlinedInput-input": {
-                  color: "black", // Dark text inside input
+                  color: "black",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(0, 0, 0, 0.2)", // Light border
+                  borderColor: "rgba(0, 0, 0, 0.2)",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(0, 0, 0, 0.4)", // Darker border on hover
+                  borderColor: "rgba(0, 0, 0, 0.4)",
                 },
                 "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
                   {
-                    borderColor: "black", // Black border when focused
+                    borderColor: "black",
                   },
-                // Adjust TextField width on small screens so button can fit
-                minWidth: { xs: "calc(100% - 80px)", sm: "auto" }, // Example: make TextField smaller if needed
+                minWidth: { xs: "calc(100% - 80px)", sm: "auto" },
               }}
             />
             <Button
-              onClick={() => {}} // Your search handler here
-              variant="contained"
+              onClick={() => handleSearch(user)}
               sx={{
-                height: "50px", // Match TextField height
-                backgroundColor: "rgba(186, 147, 223, 0.8)", // Black as per image
+                height: "50px",
+                backgroundColor: "rgba(186, 147, 223, 0.8)",
                 color: "white",
-                borderRadius: 1, // Slightly rounded corners
+                borderRadius: 1,
                 "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.8)", // Darker black on hover
+                  backgroundColor: "rgba(0, 0, 0, 0.8)",
                 },
-                flexShrink: 0, // Prevent button from shrinking
+                flexShrink: 0,
               }}
             >
               <Search sx={{ marginRight: 0.5 }} />
@@ -272,32 +320,207 @@ const SearchPage = () => {
           <Box
             sx={{ display: "flex", gap: 1, flexWrap: "wrap", marginBottom: 5 }}
           >
-            {["octocat", "torvalds", "facebook"].map((user) => (
+            {["google", "amzn", "facebook"].map((popularUser) => (
               <Button
-                key={user}
+                key={popularUser}
                 onClick={() => {
-                  /* Handle clicking popular user, e.g., set search input value */
+                  setUser(popularUser);
+                  handleSearch(popularUser);
                 }}
-                variant="text" // Use text variant with custom background to look like the image
+                variant="text"
                 size="small"
                 sx={{
-                  borderRadius: "20px", // Pill shape
-                  // Match existing button's color scheme, but slightly lighter for the "tags"
-                  backgroundColor: "rgba(173, 166, 247, 0.5)", // Lighter purple fill
+                  borderRadius: "20px",
+                  backgroundColor: "rgba(173, 166, 247, 0.5)",
                   color: "white",
-                  textTransform: "none", // Prevent uppercase
+                  textTransform: "none",
                   "&:hover": {
-                    backgroundColor: "rgba(173, 166, 247, 0.7)", // Slightly darker purple on hover
+                    backgroundColor: "rgba(173, 166, 247, 0.7)",
                   },
-                  border: "1px solid rgba(255, 255, 255, 0.2)", // Subtle border
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
                 }}
               >
-                {user}
+                {popularUser}
               </Button>
             ))}
           </Box>
         </Box>
       </Paper>
+
+      {/* Conditional Rendering for Search Results / Status */}
+      {loading ? (
+        <LoadingSpinner />
+      ) : errMessage ? (
+        <Box
+          sx={{
+            marginTop: 10,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Alert
+            severity="error"
+            variant="outlined"
+            sx={{
+              padding: 2,
+              width: 300,
+              backgroundColor: "rgba(188, 18, 18, 0.61)",
+            }}
+          >
+            <Typography color="white">{errMessage}</Typography>
+          </Alert>
+        </Box>
+      ) : hasSearched && repos.length > 0 ? (
+        <Box>
+          <Fade in={true} timeout={2000}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: 5,
+                marginTop: 3,
+                marginBottom: 10,
+              }}
+            >
+              <Box sx={{ mx: "auto" }}>
+                <Typography
+                  color="white"
+                  variant="h4"
+                  sx={{
+                    textAlign: { xs: "center", md: "left" },
+                    background:
+                      "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundSize: "200% auto",
+                    animation: `${gradientAnimation} 3s linear infinite`,
+                  }}
+                >
+                  Repositories by {user}
+                </Typography>
+              </Box>
+              <Box sx={{ mx: "auto" }}>
+                <Card
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: "rgb(74, 25, 97)",
+                    borderRadius: "6px",
+                    padding: "1",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.4)",
+                    border: "none",
+                    transition:
+                      "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "translateY(-5px)",
+                      boxShadow: "0 15px 40px rgba(0, 0, 0, 0.5)",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ padding: 2 }}>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        textAlign: { xs: "center", md: "left" },
+                        background:
+                          "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundSize: "200% auto",
+                        animation: `${gradientAnimation} 3s linear infinite`,
+                      }}
+                    >
+                      {repos.length} Repositories
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Box>
+          </Fade>
+
+          <Box
+            sx={{
+              marginTop: 10,
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            {repos.map((repo: GitHubRepo) => (
+              <Box key={repo.id} sx={{ m: 1 }}>
+                {" "}
+                {/* Added key and margin */}
+                <Card
+                  sx={{
+                    p: 2,
+                    minWidth: 280,
+                    maxWidth: 350,
+                    boxShadow: "3px 3px 5px rgba(0,0,0,0.2)",
+                    backgroundColor: "rgba(255,255,255,0.05)",
+                    color: "white",
+                  }}
+                >
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {repo.name}
+                  </Typography>
+                  {repo.description && (
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      {repo.description}
+                    </Typography>
+                  )}
+                  <Typography variant="body2">
+                    ⭐ {repo.stargazers_count}
+                  </Typography>
+                  <Typography variant="body2">
+                    Language: {repo.language || "N/A"}
+                  </Typography>
+                  <Button
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      mt: 2,
+                      color: "white",
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  >
+                    View on GitHub
+                  </Button>
+                </Card>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ) : hasSearched && repos.length === 0 && !errMessage ? (
+        <Box
+          sx={{
+            marginTop: 10,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{
+              padding: 2,
+              width: 300,
+              backgroundColor: "rgba(100, 100, 200, 0.61)",
+            }}
+          >
+            <Typography color="white">
+              No public repositories found for "{user}".
+            </Typography>
+          </Alert>
+        </Box>
+      ) : null}
     </Box>
   );
 };
