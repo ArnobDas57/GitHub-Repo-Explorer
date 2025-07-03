@@ -1,27 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import {
   Box,
   CssBaseline,
   Paper,
-  Alert,
   ThemeProvider,
   createTheme,
   Divider,
-  CircularProgress,
 } from "@mui/material";
-import { useEffect, useState, useMemo, useContext } from "react";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import FavoritesPage from "./pages/FavoritesPage";
-import SearchPage from "./pages/SearchPage";
+import { useMemo } from "react";
 import Header from "./components/Header";
-import { AuthProvider, AuthContext } from "./contexts/AuthContext"; // Import AuthContext itself
+import { AuthProvider } from "./contexts/AuthContext"; // Import AuthContext itself
 import AuthConditionalRoutes from "./routing/AuthConditionalRoutes";
 
 function App() {

@@ -6,14 +6,20 @@ import {
   Typography,
   Paper,
   Divider,
-  Alert,
   CircularProgress,
   Fade,
 } from "@mui/material";
-import { Search, TrendingUp } from "@mui/icons-material"; // Added TrendingUp import
-import { FaGithub } from "react-icons/fa"; // Added FaGithub import
+import { Search, TrendingUp } from "@mui/icons-material";
+import { FaGithub } from "react-icons/fa";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
+import { keyframes } from "@emotion/react";
+
+const gradientAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
 
 function MeshyModel({ modelPath }: { modelPath: string }) {
   const { scene } = useGLTF(modelPath);
@@ -95,13 +101,19 @@ const SearchPage = () => {
           }}
         >
           {/* Text Section */}
-          <Box sx={{ flex: 1, minWidth: { xs: "100%", md: "300px" } }}>
+          <Box sx={{ marginLeft: 2 }}>
             <Fade in={true} timeout={1000}>
               <Typography
                 variant="h4"
                 color="rgb(255, 255, 255)"
                 sx={{
                   textAlign: { xs: "center", md: "left" },
+                  background:
+                    "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundSize: "200% auto",
+                  animation: `${gradientAnimation} 3s linear infinite`,
                 }}
               >
                 Discover GitHub Repositories
@@ -147,7 +159,7 @@ const SearchPage = () => {
           sx={{
             ml: { xs: 0, md: 2 },
             textAlign: { xs: "center", md: "left" },
-            mb: 2,
+            mb: 5,
           }}
         >
           <Typography variant="h6" color="rgb(255, 255, 255)">
@@ -157,7 +169,7 @@ const SearchPage = () => {
         </Box>
 
         <Divider
-          sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+          sx={{ margin: 5, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
         />
 
         {/* New: Search GitHub User Section */}
@@ -167,7 +179,18 @@ const SearchPage = () => {
             <FaGithub
               style={{ color: "white", fontSize: "24px", marginRight: "8px" }}
             />
-            <Typography variant="h6" sx={{ color: "white" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                background:
+                  "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundSize: "200% auto",
+                animation: `${gradientAnimation} 3s linear infinite`,
+                color: "white",
+              }}
+            >
               Search GitHub User
             </Typography>
           </Box>
@@ -246,7 +269,9 @@ const SearchPage = () => {
               Try these popular users:
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Box
+            sx={{ display: "flex", gap: 1, flexWrap: "wrap", marginBottom: 5 }}
+          >
             {["octocat", "torvalds", "facebook"].map((user) => (
               <Button
                 key={user}
@@ -273,55 +298,6 @@ const SearchPage = () => {
           </Box>
         </Box>
       </Paper>
-
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 1000,
-          margin: "auto",
-        }}
-      >
-        {/* Existing Search Results Section */}
-        <Box sx={{ padding: 2, marginTop: 5 }}>
-          <Typography variant="h6" color="white">
-            Search Results
-          </Typography>
-          {/* Placeholder for search results */}
-          <Box sx={{ marginTop: 2 }}>
-            <Alert
-              severity="info"
-              sx={{
-                backgroundColor: "rgba(2, 136, 209, 0.1)",
-                backdropFilter: "blur(5px)",
-                border: "1px solid rgba(2, 136, 209, 0.3)",
-              }}
-            >
-              No results found. Try a different search.
-            </Alert>
-          </Box>
-        </Box>
-
-        {/* Existing Popular Repositories Section */}
-        <Box sx={{ padding: 2 }}>
-          <Typography variant="h6" color="white">
-            Popular Repositories
-          </Typography>
-
-          {/* Placeholder for popular repositories */}
-          <Box sx={{ marginTop: 2 }}>
-            <Alert
-              severity="info"
-              sx={{
-                backgroundColor: "rgba(2, 136, 209, 0.1)",
-                backdropFilter: "blur(5px)",
-                border: "1px solid rgba(2, 136, 209, 0.3)",
-              }}
-            >
-              No popular repositories available.
-            </Alert>
-          </Box>
-        </Box>
-      </Box>
     </Box>
   );
 };

@@ -12,6 +12,13 @@ import {
 } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
 import { Lock, Email } from "@mui/icons-material";
+import { keyframes } from "@emotion/react";
+
+const gradientAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
 
 const LoginPage = () => {
   const [identifier, setIdentifier] = useState("");
@@ -55,7 +62,18 @@ const LoginPage = () => {
         marginTop: 5,
       }}
     >
-      <Typography variant="h4" gutterBottom color="white">
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          background:
+            "linear-gradient(90deg,rgb(18, 232, 229),rgb(246, 206, 255), rgb(136, 255, 243))",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundSize: "200% auto",
+          animation: `${gradientAnimation} 3s linear infinite`,
+        }}
+      >
         Welcome back to Repo Explorer!
       </Typography>
       <Typography variant="h6" gutterBottom color="white">

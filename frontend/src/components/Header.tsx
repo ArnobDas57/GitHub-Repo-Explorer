@@ -144,7 +144,6 @@ const Header = () => {
               variant="text"
               sx={{
                 ...baseNavButtonSx,
-
                 ...(isButtonActive("/favorites")
                   ? activeNavButtonSx
                   : inactiveNavButtonSx),
