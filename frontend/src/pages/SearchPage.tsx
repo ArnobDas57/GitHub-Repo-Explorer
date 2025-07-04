@@ -158,7 +158,7 @@ const SearchPage = () => {
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
           padding: 2,
           borderRadius: 2,
-          maxWidth: "90%",
+          maxWidth: 1000,
           margin: "auto",
         }}
       >
@@ -579,7 +579,7 @@ const SearchPage = () => {
                             boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
                             transform: "scale(1.05)",
                           },
-                          animation: "gradientShift 3s ease infinite",
+                          animation: "gradientShift 5s ease infinite",
                           "@keyframes gradientShift": {
                             "0%": {
                               backgroundPosition: "0% 50%",
@@ -602,17 +602,17 @@ const SearchPage = () => {
                         variant="outlined"
                         size="small"
                         sx={{
-                          color: "white",
+                          color: "rgb(2, 29, 27)",
                           borderColor: "rgb(0, 0, 0)",
                           background:
-                            "linear-gradient(-45deg, #FE6B8B, #FF8E53, #FE6B8B, #FF8E53)",
+                            "linear-gradient(-45deg,rgb(45, 223, 246),rgb(157, 217, 16), rgb(45, 223, 246), rgb(157, 217, 16))",
                           backgroundSize: "400% 400%",
                           ":hover": {
                             backgroundPosition: "100% 50%",
                             boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
                             transform: "scale(1.05)",
                           },
-                          animation: "gradientShift 3s ease infinite",
+                          animation: "gradientShift 5s ease infinite",
                           "@keyframes gradientShift": {
                             "0%": {
                               backgroundPosition: "0% 50%",
