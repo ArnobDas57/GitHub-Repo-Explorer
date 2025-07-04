@@ -19,7 +19,7 @@ interface FavoriteRepoBody {
 
 interface Repository {
   repo_id?: string;
-  user_id: string;
+  user_id?: string;
   name: string;
   desc: string;
   starCount: number;
@@ -76,7 +76,7 @@ userRouter.post(
       if (error) throw error;
 
       if (!newRepo) {
-        res.status(500).json({ message: "Failed to create repository" });
+        res.status(500).json({ message: "Failed to save repository" });
         return;
       }
 
@@ -92,7 +92,7 @@ userRouter.post(
 
 // Get user's favorite repos
 userRouter.get(
-  "/favorites",
+  "/user/favorites",
   async (req: Request, res: Response): Promise<void> => {
     const user_id: string = (req as AuthenticatedRequest).user.id;
 
@@ -152,7 +152,7 @@ userRouter.delete(
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error deleting repo:", errorMessage);
-      res.status(500).json({ message: "Failed to delete favourite repo" });
+      res.status(500).json({ message: "Failed to delete saved repo" });
     }
   }
 );

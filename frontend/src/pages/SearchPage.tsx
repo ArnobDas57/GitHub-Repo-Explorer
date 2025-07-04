@@ -98,7 +98,13 @@ const SearchPage = () => {
     setSuccessMessage("");
 
     try {
-      await axiosInstance.post("/favorites", { repo });
+      await axiosInstance.post("user/favorites", {
+        name: repo.name,
+        desc: repo.description,
+        starCount: repo.stargazers_count,
+        link: repo.html_url,
+        language: repo.language,
+      });
       setSuccessMessage("Repository successfully saved to favorites!");
     } catch (error) {
       console.error("Failed to favorite repository", error);
@@ -363,18 +369,20 @@ const SearchPage = () => {
             justifyContent: "center",
           }}
         >
-          <Alert
-            severity="success"
-            variant="filled"
-            sx={{
-              width: "fit-content",
-              backgroundColor: "rgba(76, 175, 80, 0.8)",
-              color: "white",
-              fontWeight: "bold",
-            }}
-          >
-            {successMessage}
-          </Alert>
+          <Fade in={true} timeout={2000}>
+            <Alert
+              severity="success"
+              variant="filled"
+              sx={{
+                width: "fit-content",
+                backgroundColor: "rgba(76, 175, 80, 0.8)",
+                color: "white",
+                fontWeight: "bold",
+              }}
+            >
+              {successMessage}
+            </Alert>
+          </Fade>
         </Box>
       )}
 
@@ -391,17 +399,19 @@ const SearchPage = () => {
             alignItems: "center",
           }}
         >
-          <Alert
-            severity="error"
-            variant="outlined"
-            sx={{
-              padding: 2,
-              width: 300,
-              backgroundColor: "rgba(188, 18, 18, 0.61)",
-            }}
-          >
-            <Typography color="white">{errMessage}</Typography>
-          </Alert>
+          <Fade in={true} timeout={2000}>
+            <Alert
+              severity="error"
+              variant="outlined"
+              sx={{
+                padding: 2,
+                width: 300,
+                backgroundColor: "rgba(188, 18, 18, 0.61)",
+              }}
+            >
+              <Typography color="white">{errMessage}</Typography>
+            </Alert>
+          </Fade>
         </Box>
       ) : hasSearched && repos.length > 0 ? (
         <Box>
@@ -635,19 +645,22 @@ const SearchPage = () => {
             alignItems: "center",
           }}
         >
-          <Alert
-            severity="info"
-            variant="outlined"
-            sx={{
-              padding: 2,
-              width: 300,
-              backgroundColor: "rgba(100, 100, 200, 0.61)",
-            }}
-          >
-            <Typography color="white">
-              No public repositories found for "{user}".
-            </Typography>
-          </Alert>
+          {" "}
+          <Fade in={true} timeout={2000}>
+            <Alert
+              severity="info"
+              variant="outlined"
+              sx={{
+                padding: 2,
+                width: 300,
+                backgroundColor: "rgba(100, 100, 200, 0.61)",
+              }}
+            >
+              <Typography color="white">
+                No public repositories found for "{user}".
+              </Typography>
+            </Alert>
+          </Fade>
         </Box>
       ) : null}
     </Box>
