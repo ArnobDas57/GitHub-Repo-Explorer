@@ -9,23 +9,20 @@ dotenv.config();
 
 export const authRouter = express.Router();
 
-// Interface for expected request body
 interface AuthRequestBody {
   username?: string;
-  email?: string;
+  email: string;
   password: string;
   identifier?: string;
 }
 
-// Interface for Supabase User Row
-interface SupabaseUser {
+interface PublicUserRow {
   user_id: string;
   username: string;
   email: string;
   password: string;
 }
 
-// POST /register - REMOVED verifyToken middleware (registration should be public)
 authRouter.post(
   "/register",
   async (req: Request, res: Response): Promise<void> => {
@@ -44,57 +41,74 @@ authRouter.post(
     }
 
     try {
-      // Check JWT_SECRET exists
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error("JWT_SECRET not configured");
       }
 
-      const { data: existingUsers, error: checkError } = await supabase
-        .from("users")
-        .select("*")
-        .or(
-          `username.eq.${encodeURIComponent(
-            username
-          )},email.eq.${encodeURIComponent(email)}`
-        );
+      const { data: authSignUpData, error: authSignUpError } =
+        await supabase.auth.signUp({
+          email,
+          password,
+        });
 
-      if (checkError) throw checkError;
+      if (authSignUpError) {
+        console.error("Supabase Auth Sign Up Error:", authSignUpError);
+        res.status(400).json({ message: authSignUpError.message });
+        return;
+      }
 
-      if (existingUsers && existingUsers.length > 0) {
-        res.status(400).json({ message: "User already exists." });
+      const supabaseAuthUser = authSignUpData.user;
+
+      if (!supabaseAuthUser) {
+        res
+          .status(500)
+          .json({ message: "Failed to create user in auth system." });
         return;
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const { data: newUser, error: insertError } = await supabase
+      const { data: newUserProfile, error: insertProfileError } = await supabase
         .from("users")
-        .insert({ username, email, password: hashedPassword })
+        .insert({
+          user_id: supabaseAuthUser.id,
+          username,
+          email,
+          password: hashedPassword,
+        })
         .select("*")
         .single();
 
-      if (insertError || !newUser) throw insertError;
+      if (insertProfileError || !newUserProfile) {
+        console.error("Error inserting user profile:", insertProfileError);
+        res.status(500).json({ message: "Failed to create user profile." });
+        return;
+      }
+
+      const expiresInSeconds = parseInt(
+        process.env.JWT_EXPIRES_IN || "3600",
+        10
+      );
 
       const token = jwt.sign(
-        { id: newUser.user_id, username: newUser.username },
+        { id: supabaseAuthUser.id, username: newUserProfile.username },
         jwtSecret,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" } as jwt.SignOptions
+        { expiresIn: expiresInSeconds } as jwt.SignOptions
       );
 
       res.status(201).json({
         message: "User registered!",
         token,
-        username: newUser.username,
+        username: newUserProfile.username,
       });
     } catch (error) {
-      console.error("Signup Error:", error);
+      console.error("Registration Error:", error);
       res.status(500).json({ message: "Server error." });
     }
   }
 );
 
-// POST /login - REMOVED verifyToken middleware (login should be public)
 authRouter.post(
   "/login",
   async (req: Request, res: Response): Promise<void> => {
@@ -108,37 +122,64 @@ authRouter.post(
     }
 
     try {
-      // Check JWT_SECRET exists
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error("JWT_SECRET not configured");
       }
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .or(`username.eq.${identifier},email.eq.${identifier}`);
+      const { data: authSignInData, error: authSignInError } =
+        await supabase.auth.signInWithPassword({
+          email: identifier,
+          password,
+        });
 
-      if (error || !data || data.length === 0) {
+      if (authSignInError) {
+        console.error("Supabase Auth Sign In Error:", authSignInError);
         res.status(400).json({ message: "Invalid credentials." });
         return;
       }
 
-      const user = data[0] as SupabaseUser;
-      const isMatch = await bcrypt.compare(password, user.password);
+      const supabaseAuthUser = authSignInData.user;
+      if (!supabaseAuthUser) {
+        res
+          .status(400)
+          .json({ message: "Invalid credentials or user not found." });
+        return;
+      }
+
+      const { data: userProfile, error: fetchProfileError } = await supabase
+        .from("users")
+        .select("user_id, username, email, password")
+        .eq("user_id", supabaseAuthUser.id)
+        .single();
+
+      if (fetchProfileError || !userProfile) {
+        console.error("Error fetching user profile:", fetchProfileError);
+        res
+          .status(400)
+          .json({ message: "Invalid credentials or user profile missing." });
+        return;
+      }
+
+      const isMatch = await bcrypt.compare(password, userProfile.password);
 
       if (!isMatch) {
         res.status(400).json({ message: "Invalid credentials." });
         return;
       }
 
-      const token = jwt.sign(
-        { id: user.user_id, username: user.username },
-        jwtSecret,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "24h" } as jwt.SignOptions
+      const expiresInSeconds = parseInt(
+        process.env.JWT_EXPIRES_IN || "3600",
+        10
       );
 
-      res.status(200).json({ token, username: user.username });
+      const token = jwt.sign(
+        { id: supabaseAuthUser.id, username: userProfile.username },
+        jwtSecret,
+        { expiresIn: expiresInSeconds } as jwt.SignOptions
+      );
+
+      res.status(200).json({ token, username: userProfile.username });
     } catch (error) {
       console.error("Login Error:", error);
       res.status(500).json({ message: "Server error." });
@@ -153,22 +194,22 @@ authRouter.get(
     try {
       const userId = (req as any).user.id;
 
-      const { data: user, error } = await supabase
+      const { data: userProfile, error } = await supabase
         .from("users")
         .select("user_id, username, email")
         .eq("user_id", userId)
         .single();
 
-      if (error || !user) {
+      if (error || !userProfile) {
         res.status(404).json({ message: "User not found" });
         return;
       }
 
       res.status(200).json({
         user: {
-          id: user.user_id,
-          username: user.username,
-          email: user.email,
+          id: userProfile.user_id,
+          username: userProfile.username,
+          email: userProfile.email,
         },
       });
     } catch (error) {

@@ -100,7 +100,7 @@ const SearchPage = () => {
     try {
       await axiosInstance.post("user/favorites", {
         name: repo.name,
-        desc: repo.description,
+        desription: repo.description,
         starCount: repo.stargazers_count,
         link: repo.html_url,
         language: repo.language,
@@ -263,6 +263,11 @@ const SearchPage = () => {
               variant="outlined"
               margin="none"
               value={user}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && user.length > 0) {
+                  handleSearch(user);
+                }
+              }}
               onChange={(e) => {
                 setUser(e.target.value);
               }}

@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 interface AuthenticatedRequest extends Request {
   user: {
     id: string;
@@ -36,7 +40,8 @@ export const verifyToken = (
 
     (req as AuthenticatedRequest).user = decoded;
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.error("JWT Verification Error in verifyToken middleware:", error);
     res.status(403).json({ message: "Forbidden: Invalid token" });
     return;
   }
