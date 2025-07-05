@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -104,9 +104,10 @@ const SearchPage = () => {
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [favoriteRepos, setFavoriteRepos] = useState<Array<FavoriteRepo>>([]);
   const [fetchingFavorites, setFetchingFavorites] = useState<boolean>(true);
+  const reposRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchFavoriteRepos = async () => {
+    const fetchFavoriteRepos = async (): Promise<void> => {
       try {
         setFetchingFavorites(true);
         const response = await axiosInstance.get("/user/favorites");
@@ -120,6 +121,15 @@ const SearchPage = () => {
 
     fetchFavoriteRepos();
   }, []);
+
+  useEffect(() => {
+    if (hasSearched && repos.length > 0 && reposRef.current) {
+      reposRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [repos, hasSearched]);
 
   const handleFavorite = async (repo: GitHubRepo): Promise<void> => {
     setLoading(true);
@@ -199,9 +209,9 @@ const SearchPage = () => {
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-          padding: 2,
+          padding: 4,
+          width: "80%",
           borderRadius: 2,
-          maxWidth: 1000,
           margin: "auto",
         }}
       >
@@ -551,6 +561,7 @@ const SearchPage = () => {
           </Fade>
           <Fade in={true} timeout={2000}>
             <Box
+              ref={reposRef}
               sx={{
                 marginTop: 10,
                 display: "grid",
