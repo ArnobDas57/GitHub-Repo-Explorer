@@ -1,12 +1,11 @@
 {
   "name": "note-api",
   "version": "1.0.0",
-  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",  
-    "dev": "ts-node-dev --respawn src/server.ts" 
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn src/server.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
