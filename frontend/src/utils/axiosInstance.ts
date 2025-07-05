@@ -2,11 +2,9 @@ import axios from "axios";
 import type { InternalAxiosRequestConfig, AxiosError } from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api/",
+  baseURL: import.meta.env.VITE_REACT_APP_BACKEND_URL || "http://localhost:5000/api/",
   headers: {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
   },
 });
 
@@ -24,4 +22,3 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
