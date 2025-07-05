@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -84,6 +84,17 @@ interface GitHubRepo {
   language: string | null;
 }
 
+interface FavoriteRepo {
+  id: number;
+  name: string;
+  description: string | null;
+  starCount: number;
+  link: string;
+  language: string | null;
+  user_id: string;
+  created_at: string;
+}
+
 const SearchPage = () => {
   const [user, setUser] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -91,28 +102,56 @@ const SearchPage = () => {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [repos, setRepos] = useState<Array<GitHubRepo>>([]);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [favoriteRepos, setFavoriteRepos] = useState<Array<FavoriteRepo>>([]);
+  const [fetchingFavorites, setFetchingFavorites] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchFavoriteRepos = async () => {
+      try {
+        setFetchingFavorites(true);
+        const response = await axiosInstance.get("/user/favorites");
+        setFavoriteRepos(response.data);
+      } catch (error) {
+        console.error("Failed to fetch favorite repositories:", error);
+      } finally {
+        setFetchingFavorites(false);
+      }
+    };
+
+    fetchFavoriteRepos();
+  }, []);
 
   const handleFavorite = async (repo: GitHubRepo): Promise<void> => {
     setLoading(true);
     setErrMessage("");
     setSuccessMessage("");
 
+    console.log("Repo object being sent:", repo);
+
     try {
-      await axiosInstance.post("user/favorites", {
-        name: repo.name,
-        desription: repo.description,
-        starCount: repo.stargazers_count,
-        link: repo.html_url,
-        language: repo.language,
+      const response = await axiosInstance.post("user/favorites", {
+        name: repo.name || "",
+        description: repo.description || "",
+        starCount: repo.stargazers_count || 0,
+        link: repo.html_url || "",
+        language: repo.language || "",
       });
+
       setSuccessMessage("Repository successfully saved to favorites!");
+
+      setFavoriteRepos((prev) => [...prev, response.data]);
     } catch (error) {
       console.error("Failed to favorite repository", error);
-      setErrMessage(
-        `Error saving repository to favorites: ${
-          error instanceof Error ? error.message : "An unknown error occurred"
-        }`
-      );
+
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        setErrMessage("This repository is already in your favorites!");
+      } else {
+        setErrMessage(
+          `Error saving repository to favorites: ${
+            error instanceof Error ? error.message : "An unknown error occurred"
+          }`
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -146,6 +185,10 @@ const SearchPage = () => {
       setLoading(false);
       setHasSearched(true);
     }
+  };
+
+  const isRepoFavorited = (repoLink: string): boolean => {
+    return favoriteRepos.some((faveRepo) => faveRepo.link === repoLink);
   };
 
   return (
@@ -392,8 +435,14 @@ const SearchPage = () => {
       )}
 
       {/* Conditional Rendering for Search Results / Status */}
-      {loading ? (
-        <LoadingSpinner />
+      {loading || fetchingFavorites ? (
+        <Box
+          sx={{
+            my: 5,
+          }}
+        >
+          <LoadingSpinner />
+        </Box>
       ) : errMessage ? (
         <Box
           sx={{
@@ -606,18 +655,31 @@ const SearchPage = () => {
                         }}
                         variant="outlined"
                         size="small"
+                        disabled={isRepoFavorited(repo.html_url)}
                         sx={{
                           color: "rgb(2, 29, 27)",
                           borderColor: "rgb(0, 0, 0)",
-                          background:
-                            "linear-gradient(-45deg,rgb(45, 223, 246),rgb(157, 217, 16), rgb(45, 223, 246), rgb(157, 217, 16))",
+                          // Change background based on whether it's favorited or not
+                          background: isRepoFavorited(repo.html_url)
+                            ? "linear-gradient(-45deg, #A0A0A0, #C0C0C0)" // Grey gradient for disabled/saved state
+                            : "linear-gradient(-45deg,rgb(45, 223, 246),rgb(157, 217, 16), rgb(45, 223, 246), rgb(157, 217, 16))",
                           backgroundSize: "400% 400%",
                           ":hover": {
-                            backgroundPosition: "100% 50%",
-                            boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
-                            transform: "scale(1.05)",
+                            // No hover effect if disabled
+                            backgroundPosition: isRepoFavorited(repo.html_url)
+                              ? "0% 50%"
+                              : "100% 50%",
+                            boxShadow: isRepoFavorited(repo.html_url)
+                              ? "none"
+                              : "0 4px 20px rgba(255, 105, 135, 0.5)",
+                            transform: isRepoFavorited(repo.html_url)
+                              ? "none"
+                              : "scale(1.05)",
                           },
-                          animation: "gradientShift 5s ease infinite",
+                          // No animation if disabled
+                          animation: isRepoFavorited(repo.html_url)
+                            ? "none"
+                            : "gradientShift 5s ease infinite",
                           "@keyframes gradientShift": {
                             "0%": {
                               backgroundPosition: "0% 50%",
@@ -631,7 +693,9 @@ const SearchPage = () => {
                           },
                         }}
                       >
-                        Save to favorites
+                        {isRepoFavorited(repo.html_url)
+                          ? "Saved"
+                          : "Save to favorites"}
                       </Button>
                     </Box>
                   </Card>

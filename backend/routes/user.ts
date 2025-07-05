@@ -30,9 +30,9 @@ interface Repository {
 
 interface SupabaseError {
   message: string;
-  details?: string;
-  hint?: string;
-  code?: string;
+  details?: string | null;
+  hint?: string | null;
+  code?: string | null;
 }
 
 export const userRouter = express.Router();
@@ -71,10 +71,18 @@ userRouter.post(
     const { name, description, starCount, link, language }: FavoriteRepoBody =
       req.body;
 
-    if (!name || !description || !starCount || !link || !language) {
+    console.log("Backend received req.body:", req.body);
+
+    if (
+      !name ||
+      name.trim().length === 0 ||
+      !link ||
+      link.trim().length === 0 ||
+      typeof starCount !== "number" ||
+      starCount < 0
+    ) {
       res.status(400).json({
-        message:
-          "Name, Description, StarCount, Link, and Language are Required",
+        message: "Name, Link, and StarCount are required and must be valid.",
       });
       return;
     }
@@ -102,7 +110,20 @@ userRouter.post(
       res.status(201).json(newRepo);
     } catch (error: unknown) {
       console.error("Error saving new favourite repository:", error);
-      res.status(500).json({ message: "Failed to save repository" });
+
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        "message" in error &&
+        error.code === "23505"
+      ) {
+        res
+          .status(409)
+          .json({ message: "This repository is already in your favorites." });
+      } else {
+        res.status(500).json({ message: "Failed to save repository" });
+      }
     }
   }
 );
