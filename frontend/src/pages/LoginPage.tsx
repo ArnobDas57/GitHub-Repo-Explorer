@@ -64,6 +64,7 @@ const LoginPage = () => {
     >
       <Typography
         variant="h4"
+        fontWeight="bold"
         gutterBottom
         sx={{
           background:

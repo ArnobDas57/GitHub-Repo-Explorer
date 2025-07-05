@@ -14,6 +14,10 @@ interface FavoriteRepoBody {
   starCount: number;
   link: string;
   language: string;
+  owner?: {
+    login: string;
+    avatar_url: string;
+  };
 }
 
 interface Repository {
@@ -26,6 +30,10 @@ interface Repository {
   language: string;
   created_at?: string;
   updated_at?: string;
+  owner?: {
+    login: string;
+    avatar_url: string;
+  };
 }
 
 interface SupabaseError {
@@ -68,8 +76,17 @@ userRouter.post(
   "/favorites",
   async (req: Request, res: Response): Promise<void> => {
     const user_id: string = (req as AuthenticatedRequest).user.id;
-    const { name, description, starCount, link, language }: FavoriteRepoBody =
-      req.body;
+    const {
+      name,
+      description,
+      starCount,
+      link,
+      language,
+      owner,
+    }: FavoriteRepoBody = req.body;
+
+    const owner_login = owner?.login;
+    const owner_avatar_url = owner?.avatar_url;
 
     console.log("Backend received req.body:", req.body);
 
@@ -96,7 +113,18 @@ userRouter.post(
       }: { data: Repository | null; error: SupabaseError | null } =
         await userSupabase
           .from("repos")
-          .insert([{ user_id, name, description, starCount, link, language }])
+          .insert([
+            {
+              user_id,
+              name,
+              description,
+              starCount,
+              link,
+              language,
+              owner_login,
+              owner_avatar_url,
+            },
+          ])
           .select()
           .single();
 
@@ -129,7 +157,7 @@ userRouter.post(
 );
 
 userRouter.get(
-  "/user/favorites",
+  "/favorites",
   async (req: Request, res: Response): Promise<void> => {
     const user_id: string = (req as AuthenticatedRequest).user.id;
 

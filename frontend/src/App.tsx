@@ -120,13 +120,11 @@ function App() {
           >
             <Header />
             <Divider
-              sx={{ margin: 2, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+              sx={{ margin: 5, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
             />
             <Paper
               sx={{
                 flex: 1,
-                padding: 2,
-                margin: 2,
                 backgroundColor: "transparent",
                 borderRadius: 2,
                 boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",

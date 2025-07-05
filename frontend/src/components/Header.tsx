@@ -96,7 +96,7 @@ const Header = () => {
         to={isAuthenticated ? "/search" : "/login"}
         style={{ textDecoration: "none", color: "white" }}
       >
-        <Typography variant="h4" color="rgb(235, 221, 255)">
+        <Typography variant="h4" color="rgb(235, 221, 255)" fontWeight="bold">
           {text.split("").map((char, index) => (
             <span
               key={index}
@@ -226,7 +226,7 @@ const Header = () => {
 
       <style>{`
         .char-animation {
-          animation: fadeInUpContinuous 4s ease infinite;
+          animation: fadeInUpContinuous 5s ease infinite;
         }
 
         .avatar-pulse {

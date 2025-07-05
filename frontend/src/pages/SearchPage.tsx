@@ -11,8 +11,15 @@ import {
   Card,
   CardContent,
   Alert,
+  Avatar,
 } from "@mui/material";
-import { Search, TrendingUp } from "@mui/icons-material";
+import {
+  Search,
+  TrendingUp,
+  OpenInNew,
+  Favorite,
+  Code,
+} from "@mui/icons-material";
 import { FaGithub } from "react-icons/fa";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
@@ -82,6 +89,10 @@ interface GitHubRepo {
   description: string | null;
   stargazers_count: number;
   language: string | null;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
 }
 
 interface FavoriteRepo {
@@ -105,6 +116,18 @@ const SearchPage = () => {
   const [favoriteRepos, setFavoriteRepos] = useState<Array<FavoriteRepo>>([]);
   const [fetchingFavorites, setFetchingFavorites] = useState<boolean>(true);
   const reposRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [successMessage]);
 
   useEffect(() => {
     const fetchFavoriteRepos = async (): Promise<void> => {
@@ -145,6 +168,10 @@ const SearchPage = () => {
         starCount: repo.stargazers_count || 0,
         link: repo.html_url || "",
         language: repo.language || "",
+        owner: {
+          login: repo.owner.login,
+          avatar_url: repo.owner.avatar_url,
+        },
       });
 
       setSuccessMessage("Repository successfully saved to favorites!");
@@ -228,8 +255,9 @@ const SearchPage = () => {
           <Box sx={{ marginLeft: 2 }}>
             <Fade in={true} timeout={1000}>
               <Typography
-                variant="h5"
+                variant="h4"
                 color="rgb(255, 255, 255)"
+                fontWeight="bold"
                 sx={{
                   textAlign: { xs: "center", md: "left" },
                   background:
@@ -282,10 +310,11 @@ const SearchPage = () => {
           {/* Top heading: Search GitHub User with icon */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <FaGithub
-              style={{ color: "white", fontSize: "24px", marginRight: "8px" }}
+              style={{ color: "white", fontSize: "30px", marginRight: "8px" }}
             />
             <Typography
-              variant="h6"
+              variant="h5"
+              fontWeight="bold"
               sx={{
                 background:
                   "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
@@ -420,14 +449,14 @@ const SearchPage = () => {
       </Paper>
 
       {successMessage && (
-        <Box
-          sx={{
-            marginTop: 2,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Fade in={true} timeout={2000}>
+        <Fade in={true} timeout={1000}>
+          <Box
+            sx={{
+              marginTop: 5,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Alert
               severity="success"
               variant="filled"
@@ -440,8 +469,8 @@ const SearchPage = () => {
             >
               {successMessage}
             </Alert>
-          </Fade>
-        </Box>
+          </Box>
+        </Fade>
       )}
 
       {/* Conditional Rendering for Search Results / Status */}
@@ -481,6 +510,7 @@ const SearchPage = () => {
         <Box>
           <Fade in={true} timeout={2000}>
             <Box
+              ref={reposRef}
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
@@ -561,7 +591,6 @@ const SearchPage = () => {
           </Fade>
           <Fade in={true} timeout={2000}>
             <Box
-              ref={reposRef}
               sx={{
                 marginTop: 10,
                 display: "grid",
@@ -580,103 +609,140 @@ const SearchPage = () => {
               }}
             >
               {repos.map((repo: GitHubRepo) => (
-                <Box key={repo.id}>
-                  {" "}
-                  {/* Added key and margin */}
+                <Fade in={true} timeout={500} key={repo.id}>
                   <Card
                     sx={{
                       p: 2.5,
                       minWidth: 280,
                       maxWidth: 350,
-                      boxShadow: "3px 3px 5px rgba(25, 1, 66, 0.8)",
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
                       backgroundColor: "rgba(136, 96, 230, 0.74)",
                       color: "white",
-                      gap: 2,
+                      borderRadius: 2,
+                      transition:
+                        "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                      "&:hover": {
+                        transform: "translateY(-5px)",
+                        boxShadow: "0 12px 36px rgba(0, 0, 0, 0.4)",
+                      },
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
                     }}
                   >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        mb: 1,
-                        background:
-                          "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundSize: "200% auto",
-                        animation: `${gradientAnimation} 5s linear infinite`,
-                      }}
-                    >
-                      {repo.name}
-                    </Typography>
-                    {repo.description && (
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {repo.description}
+                    <CardContent sx={{ flexGrow: 1, p: 0 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          mb: 1,
+                          gap: 1,
+                        }}
+                      >
+                        <Avatar
+                          alt={repo.owner.login}
+                          src={repo.owner.avatar_url}
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            border: "2px solid rgba(255,255,255,0.7)",
+                          }}
+                        />
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            mb: 1,
+                            background:
+                              "linear-gradient(90deg,rgb(48, 247, 204),rgb(246, 206, 255), rgb(48, 247, 204))",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundSize: "200% auto",
+                            animation: `${gradientAnimation} 5s linear infinite`,
+                          }}
+                        >
+                          {repo.name}
+                        </Typography>
+                      </Box>
+                      {repo.description && (
+                        <Typography
+                          variant="body2"
+                          sx={{ mb: 1, opacity: 0.9 }}
+                        >
+                          {repo.description}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center", mb: 0.5 }}
+                      >
+                        <Favorite
+                          sx={{ fontSize: 16, mr: 0.5, color: "gold" }}
+                        />
+                        {repo.stargazers_count} stars
                       </Typography>
-                    )}
-                    <Typography variant="body2">
-                      ⭐ {repo.stargazers_count}
-                    </Typography>
-                    <Typography variant="body2">
-                      Language: {repo.language || "N/A"}
-                    </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center", mb: 0.5 }}
+                      >
+                        <Code sx={{ fontSize: 16, mr: 0.5 }} />
+                        Language: {repo.language || "N/A"}
+                      </Typography>
+                    </CardContent>
+
                     <Box
                       sx={{
                         mt: 2,
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        gap: 1,
+                        flexWrap: "wrap",
                       }}
                     >
                       <Button
                         href={repo.html_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        variant="outlined"
+                        variant="contained"
                         size="small"
+                        endIcon={<OpenInNew />}
                         sx={{
-                          color: "white",
-                          borderColor: "rgb(0, 0, 0)",
+                          flexGrow: 1,
+                          minWidth: "120px",
+                          color: "white", // Adjusted color for better visibility on gradient
+                          borderColor: "rgb(0, 0, 0)", // Keep border as it was
                           background:
-                            "linear-gradient(-45deg, #FE6B8B, #FF8E53, #FE6B8B, #FF8E53)",
+                            "linear-gradient(-45deg, #FE6B8B, #FF8E53, #FE6B8B, #FF8E53)", // Re-added your gradient
                           backgroundSize: "400% 400%",
+                          animation: "gradientShift 5s ease infinite", // Re-added your animation
                           ":hover": {
                             backgroundPosition: "100% 50%",
                             boxShadow: "0 4px 20px rgba(255, 105, 135, 0.5)",
                             transform: "scale(1.05)",
                           },
-                          animation: "gradientShift 5s ease infinite",
-                          "@keyframes gradientShift": {
-                            "0%": {
-                              backgroundPosition: "0% 50%",
-                            },
-                            "50%": {
-                              backgroundPosition: "100% 50%",
-                            },
-                            "100%": {
-                              backgroundPosition: "0% 50%",
-                            },
-                          },
                         }}
                       >
                         View on GitHub
                       </Button>
+
                       <Button
                         onClick={() => {
                           handleFavorite(repo);
                         }}
                         variant="outlined"
                         size="small"
+                        startIcon={<Favorite sx={{ color: "red" }} />}
                         disabled={isRepoFavorited(repo.html_url)}
                         sx={{
-                          color: "rgb(2, 29, 27)",
+                          flexGrow: 1,
+                          minWidth: "120px",
+                          color: "rgb(0,0,0)",
                           borderColor: "rgb(0, 0, 0)",
-                          // Change background based on whether it's favorited or not
                           background: isRepoFavorited(repo.html_url)
-                            ? "linear-gradient(-45deg, #A0A0A0, #C0C0C0)" // Grey gradient for disabled/saved state
+                            ? "linear-gradient(-45deg, #A0A0A0, #C0C0C0)"
                             : "linear-gradient(-45deg,rgb(45, 223, 246),rgb(157, 217, 16), rgb(45, 223, 246), rgb(157, 217, 16))",
                           backgroundSize: "400% 400%",
                           ":hover": {
-                            // No hover effect if disabled
                             backgroundPosition: isRepoFavorited(repo.html_url)
                               ? "0% 50%"
                               : "100% 50%",
@@ -687,7 +753,6 @@ const SearchPage = () => {
                               ? "none"
                               : "scale(1.05)",
                           },
-                          // No animation if disabled
                           animation: isRepoFavorited(repo.html_url)
                             ? "none"
                             : "gradientShift 5s ease infinite",
@@ -710,7 +775,7 @@ const SearchPage = () => {
                       </Button>
                     </Box>
                   </Card>
-                </Box>
+                </Fade>
               ))}
             </Box>
           </Fade>
