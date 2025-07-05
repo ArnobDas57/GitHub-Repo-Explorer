@@ -59,13 +59,14 @@ const createAuthSupabaseClient = (req: Request): SupabaseClient => {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL as string;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
+  const supabaseServiceRoleKey = process.env
+    .SUPABASE_SERVICE_ROLE_KEY as string; // Or process.env.SUPABASE_ANON_KEY if you didn't rename it on Render
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error("Supabase environment variables not configured.");
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
     global: {
       headers: {
         Authorization: `Bearer ${token}`,
