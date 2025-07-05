@@ -10,7 +10,7 @@ dotenv.config();
 
 const allowedOrigins = [
   "http://localhost:5173", // local-development
-  "https://repo-explorer-chi.vercel.app/", // frontend URL
+  "https://repo-explorer-chi.vercel.app", // frontend URL
 ];
 
 const PORT = process.env.PORT || 5000;
