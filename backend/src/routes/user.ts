@@ -51,28 +51,15 @@ userRouter.use(verifyToken);
 
 // Helper function to create an authenticated Supabase client for the request
 const createAuthSupabaseClient = (req: Request): SupabaseClient => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(" ")[1];
-
-  if (!token) {
-    throw new Error("Authentication token missing.");
-  }
-
   const supabaseUrl = process.env.SUPABASE_URL as string;
   const supabaseServiceRoleKey = process.env
-    .SUPABASE_SERVICE_ROLE_KEY as string; // Or process.env.SUPABASE_ANON_KEY if you didn't rename it on Render
+    .SUPABASE_SERVICE_ROLE_KEY as string; // Ensure this env var is correctly set on Render
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error("Supabase environment variables not configured.");
   }
 
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  });
+  return createClient(supabaseUrl, supabaseServiceRoleKey);
 };
 
 userRouter.post(
@@ -179,7 +166,7 @@ userRouter.get(
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
-      console.error("Error fetching repositories:", errorMessage);
+      console.error("Detailed error fetching repositories:", err);
       res.status(500).json({ message: "Failed to fetch repositories" });
     }
   }
@@ -221,8 +208,10 @@ userRouter.delete(
         .json({ message: "Saved repo deleted", note: deletedRepo });
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Error deleting repo:", errorMessage);
+        (error as SupabaseError).message ||
+        (error as Error).message ||
+        "Unknown error occurred";
+      console.error("Detailed error deleting repo:", error);
       res.status(500).json({ message: "Failed to delete saved repo" });
     }
   }
