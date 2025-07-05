@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import Header from "./components/Header";
 import { AuthProvider } from "./contexts/AuthContext"; // Import AuthContext itself
 import AuthConditionalRoutes from "./routing/AuthConditionalRoutes";
+import Footer from "./components/Footer";
 
 function App() {
   const theme = useMemo(
@@ -132,6 +133,7 @@ function App() {
             >
               <AuthConditionalRoutes theme={theme} />
             </Paper>
+            <Footer />
           </Box>
         </ThemeProvider>
       </AuthProvider>

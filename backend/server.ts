@@ -9,7 +9,7 @@ import { userRouter } from "./routes/user";
 dotenv.config();
 
 const allowedOrigins = [
-  "http://localhost:3000", // local-development
+  "http://localhost:5173", // local-development
   "https://your-deployed-frontend-url.com", // frontend URL
 ];
 
