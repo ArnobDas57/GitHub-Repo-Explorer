@@ -35,7 +35,7 @@ const gradientAnimation = keyframes`
 `;
 
 interface FavoriteRepo {
-  id: number;
+  repo_id: string;
   name: string;
   description: string | null;
   starCount: number;
@@ -57,6 +57,18 @@ const FavoritesPage = () => {
   const [repoToDelete, setRepoToDelete] = useState<FavoriteRepo | null>(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+      if (successMessage) {
+        const timer = setTimeout(() => {
+          setSuccessMessage("");
+        }, 1000);
+  
+        return () => {
+          clearTimeout(timer);
+        };
+      }
+    }, [successMessage]);
 
   useEffect(() => {
     const fetchFavoriteRepos = async (): Promise<void> => {
@@ -96,9 +108,9 @@ const FavoritesPage = () => {
     setSuccessMessage("");
 
     try {
-      await axiosInstance.delete(`/user/favorites/${repoToDelete.id}`);
+      await axiosInstance.delete(`/user/favorites/${repoToDelete.repo_id}`);
       setFavoriteRepos((prevRepos) =>
-        prevRepos.filter((repo) => repo.id !== repoToDelete.id)
+        prevRepos.filter((repo) => repo.repo_id !== repoToDelete.repo_id)
       );
       setSuccessMessage("Repository successfully removed from favorites!");
     } catch (error) {
@@ -253,7 +265,7 @@ const FavoritesPage = () => {
               >
                 {favoriteRepos.map((repo: FavoriteRepo) => (
                   <Card
-                    key={repo.id}
+                    key={repo.repo_id}
                     sx={{
                       p: 2,
                       boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
@@ -511,6 +523,13 @@ const FavoritesPage = () => {
             Are you sure you want to remove "
             <span style={{ fontWeight: "bold" }}>{repoToDelete?.name}</span>"
             from your favorites? This action cannot be undone.
+            {errorMessage && (
+              <Fade in={true} timeout={2000}>
+                <Typography sx={{ marginTop: 2 }} color="#E6A519">
+                  Failed to remove repository
+                </Typography>
+              </Fade>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -9,6 +9,8 @@ interface AuthenticatedRequest extends Request {
 }
 
 interface FavoriteRepoBody {
+  repo_id?: string;
+  user_id?: string;
   name: string;
   description: string;
   starCount: number;
