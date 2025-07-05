@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-import supabase from "../db";
+import supabase from "../db/db";
 import { verifyToken } from "../middleware/auth";
 
 dotenv.config();

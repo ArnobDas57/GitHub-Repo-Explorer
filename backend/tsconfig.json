@@ -14,10 +14,6 @@
     "moduleDetection": "force",
     "types": ["node"]
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "include": ["src/**/*.ts"], // <--- RECOMMEND THIS: Be explicit about source files
   "exclude": ["node_modules", "./dist"] // <--- CHANGE THIS: Exclude the new local dist
 }
